@@ -1,0 +1,1 @@
+Kabitix AI A custom artificial intelligence model built around alternative non-binary computational data structures.Architecture FoundationsLogic Base: Base-44 numerical framework instead of standard binary/floating-point representation.Design Objective: Exploring optimized pattern mapping and compact state tracking without traditional high-level AI dependencies.
