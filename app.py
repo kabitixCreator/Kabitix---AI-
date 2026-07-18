@@ -1,4 +1,3 @@
-
 import streamlit as st
 import requests
 
@@ -21,15 +20,13 @@ if prompt := st.chat_input("Ask Kabitix anything..."):
     with st.chat_message("assistant"):
         with st.spinner("Kabitix is thinking..."):
             try:
-                # Stable free AI backup router layout
-                payload = {
-                    "contents": [{"parts": [{"text": prompt}]}]
-                }
-                url = "https://googleapis.com"
-                res = requests.post(url, json=payload)
+                # Direct unrestricted free public AI connection node
+                url = f"https://text.pollinations.ai/{requests.utils.quote(prompt)}"
+                res = requests.get(url, timeout=15)
                 
-                # Extract clean response text layout safely
-                response = res.json()["candidates"][0]["content"]["parts"][0]["text"]
+                # Fixed line: reads response directly as clean text layout
+                response = res.text
+                
                 st.markdown(response)
                 st.session_state.messages.append({"role": "assistant", "content": response})
             except Exception as e:
