@@ -39,7 +39,7 @@ if prompt := st.chat_input("Ask Kabitix anything..."):
     with st.chat_message("assistant"):
         with st.spinner("Kabitix is thinking..."):
             try:
-                # Stable free AI backup router layout
+                # Stable free AI backup router layout with full correct address link
                 payload = {
                     "contents": [{"parts": [{"text": prompt}]}]
                 }
