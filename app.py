@@ -1,5 +1,5 @@
-
 import streamlit as st
+import urllib.parse
 import requests
 
 st.set_page_config(page_title="Kabitix AI", page_icon="🤖")
@@ -21,9 +21,10 @@ if prompt := st.chat_input("Ask Kabitix anything..."):
     with st.chat_message("assistant"):
         with st.spinner("Kabitix is thinking..."):
             try:
-                # Direct unrestricted free public AI connection node
-                url = f"https://pollinations.ai{requests.utils.quote(prompt)}"
-                res = requests.get(url)
+                # Upgraded text formatting connection link
+                clean_prompt = urllib.parse.quote(prompt)
+                url = f"https://pollinations.ai{clean_prompt}"
+                res = requests.get(url, timeout=15)
                 response = res.text
                 st.markdown(response)
                 st.session_state.messages.append({"role": "assistant", "content": response})
