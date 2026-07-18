@@ -5,8 +5,8 @@ from groq import Groq
 st.title("Kabitix AI Platform")
 st.write("Welcome to the unlimited, original Kabitix AI.")
 
-# Configure your unlimited free AI engine with your key
-client = Groq(api_key="gsk_6kzYZBOfPhxAZdePwHjCWGdyb3FYiSFXAiTQkBpZaFTHz9yoRWQ")
+# Read your key safely from the Streamlit Secrets vault
+client = Groq(api_key=st.secrets["GROQ_API_KEY"])
 
 # Manage chat history state
 if "messages" not in st.session_state:
