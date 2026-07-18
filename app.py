@@ -1,5 +1,5 @@
+
 import streamlit as st
-import urllib.parse
 import requests
 
 st.set_page_config(page_title="Kabitix AI", page_icon="🤖")
@@ -21,11 +21,15 @@ if prompt := st.chat_input("Ask Kabitix anything..."):
     with st.chat_message("assistant"):
         with st.spinner("Kabitix is thinking..."):
             try:
-                # Upgraded text formatting connection link
-                clean_prompt = urllib.parse.quote(prompt)
-                url = f"https://pollinations.ai{clean_prompt}"
-                res = requests.get(url, timeout=15)
-                response = res.text
+                # Stable free AI backup router layout
+                payload = {
+                    "contents": [{"parts": [{"text": prompt}]}]
+                }
+                url = "https://googleapis.com"
+                res = requests.post(url, json=payload)
+                
+                # Extract clean response text layout safely
+                response = res.json()["candidates"][0]["content"]["parts"][0]["text"]
                 st.markdown(response)
                 st.session_state.messages.append({"role": "assistant", "content": response})
             except Exception as e:
