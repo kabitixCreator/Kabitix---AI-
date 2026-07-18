@@ -1,15 +1,11 @@
 
 import streamlit as st
-from groq import Groq
+import requests
 
-# Main configurations
-st.title("Kabitix AI Platform")
-st.write("Welcome to the unlimited, original Kabitix AI.")
+st.set_page_config(page_title="Kabitix AI", page_icon="🤖")
+st.title("🚀 Kabitix AI Platform")
+st.write("Welcome to your 100% free, unlimited original AI engine.")
 
-# Configure your unlimited free AI engine directly with your working key
-client = Groq(api_key="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")
-
-# Manage chat history state
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
@@ -23,10 +19,13 @@ if prompt := st.chat_input("Ask Kabitix anything..."):
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        chat_completion = client.chat.completions.create(
-            messages=[{"role": "user", "content": prompt}],
-            model="llama3-8b-8192",
-        )
-        response = chat_completion.choices.message.content
-        st.markdown(response)
-    st.session_state.messages.append({"role": "assistant", "content": response})
+        with st.spinner("Kabitix is thinking..."):
+            try:
+                # Direct unrestricted free public AI connection node
+                url = f"https://pollinations.ai{requests.utils.quote(prompt)}"
+                res = requests.get(url)
+                response = res.text
+                st.markdown(response)
+                st.session_state.messages.append({"role": "assistant", "content": response})
+            except Exception as e:
+                st.error("Connection glitch. Please try sending your message again!")
