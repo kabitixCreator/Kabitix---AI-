@@ -10,7 +10,7 @@ st.set_page_config(page_title="Kabitix AI", page_icon="🧠", layout="wide")
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Clean ChatGPT-style CSS
+# Professional CSS - Clean gray icons
 st.markdown("""
 <style>
     /* Hide Streamlit branding */
@@ -44,7 +44,7 @@ st.markdown("""
         font-size: 16px;
     }
     
-    /* AI message text (no bubble, just clean text) */
+    /* AI message text */
     .ai-msg {
         padding: 10px 0;
         margin: 10px 0;
@@ -54,24 +54,26 @@ st.markdown("""
         line-height: 1.6;
     }
     
-    /* Small, clean action buttons (like ChatGPT) */
+    /* Clean action buttons - WHITE/GRAY only! */
     .action-row {
         display: flex;
-        gap: 12px;
-        margin-top: 5px;
-        opacity: 0.5; /* Make them subtle */
+        gap: 15px;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid #333;
     }
     
     .action-icon {
         cursor: pointer;
-        font-size: 14px;
-        color: #b4b4b4;
-        transition: opacity 0.2s;
+        font-size: 16px;
+        color: #8e8e8e; /* GRAY color - not yellow! */
+        transition: all 0.2s;
+        filter: grayscale(100%); /* Force grayscale */
     }
     
     .action-icon:hover {
-        opacity: 1;
-        color: white;
+        color: #ffffff; /* White on hover */
+        transform: scale(1.1);
     }
     
     /* Chat Input */
@@ -115,14 +117,14 @@ for msg in st.session_state.messages:
         # AI Message
         st.markdown(f'<div class="ai-msg">{msg["content"]}</div>', unsafe_allow_html=True)
         
-        # Small, clean action buttons (No big yellow emojis!)
+        # Clean GRAY action buttons (no yellow emojis!)
         st.markdown('''
         <div class="action-row">
-            <span class="action-icon" title="Good response">👍</span>
-            <span class="action-icon" title="Bad response">👎</span>
-            <span class="action-icon" title="Copy">📋</span>
-            <span class="action-icon" title="Read aloud">🔊</span>
-            <span class="action-icon" title="Share"></span>
+            <span class="action-icon" title="Good response">&#128077;</span>
+            <span class="action-icon" title="Bad response">&#128078;</span>
+            <span class="action-icon" title="Copy">&#128203;</span>
+            <span class="action-icon" title="Read aloud">&#128266;</span>
+            <span class="action-icon" title="Share">&#128230;</span>
         </div>
         ''', unsafe_allow_html=True)
 
@@ -130,18 +132,17 @@ for msg in st.session_state.messages:
 # CHAT INPUT & LOGIC
 # ==========================================
 if prompt := st.chat_input("Message Kabitix..."):
-    # 1. Add user message
+    # Add user message
     st.session_state.messages.append({"role": "user", "content": prompt})
     
-    # 2. Get AI response
+    # Get AI response
     try:
         url = f"https://text.pollinations.ai/{urllib.parse.quote(prompt)}"
         response = requests.get(url, timeout=15).text
         
-        # 3. Add AI message ONLY if successful
+        # Add AI message
         st.session_state.messages.append({"role": "assistant", "content": response})
-        st.rerun() # Refresh to show new messages
+        st.rerun()
         
     except Exception as e:
-        # If error, just show a temporary red box (DO NOT add to chat history)
         st.error("⚠️ Connection error. Please try again.")
