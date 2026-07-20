@@ -1,3 +1,4 @@
+
 import streamlit as st
 import requests
 import urllib.parse
@@ -8,8 +9,6 @@ st.set_page_config(page_title="Kabitix AI", page_icon="🧠", layout="wide")
 # Initialize State
 if "messages" not in st.session_state:
     st.session_state.messages = []
-if "current_page" not in st.session_state:
-    st.session_state.current_page = "chat"
 
 # Clean ChatGPT-style CSS
 st.markdown("""
@@ -24,17 +23,17 @@ st.markdown("""
         color: #ececf1;
     }
     
-    /* Clean top bar - just logo and new chat */
+    /* Top Bar */
     .top-bar {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 15px 30px;
-        border-bottom: 1px solid #424242;
+        padding: 10px 20px;
+        border-bottom: 1px solid #333;
         margin-bottom: 20px;
     }
     
-    /* User message */
+    /* User message bubble */
     .user-msg {
         background-color: #424242;
         padding: 12px 18px;
@@ -45,7 +44,7 @@ st.markdown("""
         font-size: 16px;
     }
     
-    /* AI message */
+    /* AI message text (no bubble, just clean text) */
     .ai-msg {
         padding: 10px 0;
         margin: 10px 0;
@@ -55,31 +54,27 @@ st.markdown("""
         line-height: 1.6;
     }
     
-    /* Action buttons */
-    .action-buttons {
+    /* Small, clean action buttons (like ChatGPT) */
+    .action-row {
         display: flex;
-        gap: 8px;
-        margin-top: 10px;
-        padding-top: 10px;
-        border-top: 1px solid #424242;
+        gap: 12px;
+        margin-top: 5px;
+        opacity: 0.5; /* Make them subtle */
     }
     
-    .action-btn {
-        background: none;
-        border: none;
-        color: #b4b4b4;
+    .action-icon {
         cursor: pointer;
-        padding: 5px 10px;
-        border-radius: 6px;
-        font-size: 16px;
+        font-size: 14px;
+        color: #b4b4b4;
+        transition: opacity 0.2s;
     }
     
-    .action-btn:hover {
-        background-color: #424242;
-        color: #ececf1;
+    .action-icon:hover {
+        opacity: 1;
+        color: white;
     }
     
-    /* Chat input area */
+    /* Chat Input */
     .stChatInput textarea {
         background-color: #2f2f2f;
         color: white;
@@ -90,78 +85,63 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# CLEAN TOP BAR (Like ChatGPT)
+# TOP BAR (Logo + New Chat)
 # ==========================================
 col_logo, col_newchat = st.columns([3, 1])
 
 with col_logo:
-    st.markdown('<h1 style="font-size: 24px; margin: 0; color: #ececf1;">🧠 Kabitix</h1>', unsafe_allow_html=True)
+    st.markdown('<h1 style="font-size: 22px; margin: 0; color: #ececf1;">🧠 Kabitix</h1>', unsafe_allow_html=True)
 
 with col_newchat:
-    if st.button("➕ New Chat", use_container_width=False):
+    if st.button(" New Chat", use_container_width=False):
         st.session_state.messages = []
         st.rerun()
 
 st.markdown("---")
 
 # ==========================================
-# CHAT INTERFACE (Main Focus)
+# WELCOME MESSAGE (Only shows if chat is empty)
 # ==========================================
-st.markdown('<h2 style="text-align: center; color: #ececf1; margin-bottom: 30px;">How can I help you today?</h2>', unsafe_allow_html=True)
+if len(st.session_state.messages) == 0:
+    st.markdown('<h2 style="text-align: center; color: #ececf1; margin-top: 50px;">How can I help you today?</h2>', unsafe_allow_html=True)
 
-# Display messages
-for idx, msg in enumerate(st.session_state.messages):
+# ==========================================
+# CHAT MESSAGES
+# ==========================================
+for msg in st.session_state.messages:
     if msg["role"] == "user":
         st.markdown(f'<div class="user-msg">{msg["content"]}</div>', unsafe_allow_html=True)
     else:
+        # AI Message
         st.markdown(f'<div class="ai-msg">{msg["content"]}</div>', unsafe_allow_html=True)
         
-        # Action buttons for AI messages
+        # Small, clean action buttons (No big yellow emojis!)
         st.markdown('''
-        <div class="action-buttons">
-            <button class="action-btn" title="Like">👍</button>
-            <button class="action-btn" title="Dislike">👎</button>
-            <button class="action-btn" title="Copy">📋</button>
-            <button class="action-btn" title="Read aloud">🔊</button>
-            <button class="action-btn" title="Share">📤</button>
+        <div class="action-row">
+            <span class="action-icon" title="Good response">👍</span>
+            <span class="action-icon" title="Bad response">👎</span>
+            <span class="action-icon" title="Copy">📋</span>
+            <span class="action-icon" title="Read aloud">🔊</span>
+            <span class="action-icon" title="Share"></span>
         </div>
         ''', unsafe_allow_html=True)
-        st.markdown("<br>", unsafe_allow_html=True)
 
-# Chat Input
+# ==========================================
+# CHAT INPUT & LOGIC
+# ==========================================
 if prompt := st.chat_input("Message Kabitix..."):
+    # 1. Add user message
     st.session_state.messages.append({"role": "user", "content": prompt})
     
-    with st.spinner("Thinking..."):
-        try:
-            url = f"https://text.pollinations.ai/{urllib.parse.quote(prompt)}"
-            response = requests.get(url, timeout=15).text
-            st.session_state.messages.append({"role": "assistant", "content": response})
-            st.rerun()
-        except:
-            st.session_state.messages.append({"role": "assistant", "content": "⚠️ Connection error. Try again."})
-            st.rerun()
-
-# ==========================================
-# SIDEBAR (Hidden by default, accessible via menu)
-# ==========================================
-with st.sidebar:
-    st.title(" Kabitix Menu")
-    st.markdown("---")
-    
-    if st.button("💬 AI Chat", use_container_width=True):
-        st.session_state.current_page = "chat"
-        st.rerun()
-    
-    if st.button("📸 Image Generator", use_container_width=True):
-        st.session_state.current_page = "images"
-        st.rerun()
-    
-    st.markdown("---")
-    
-    if st.button("⚙️ Settings", use_container_width=True):
-        st.session_state.current_page = "settings"
-        st.rerun()
-    
-    st.markdown("---")
-    st.caption("© 2026 Kabitix AI\nBuilt by Kabit Lego")
+    # 2. Get AI response
+    try:
+        url = f"https://text.pollinations.ai/{urllib.parse.quote(prompt)}"
+        response = requests.get(url, timeout=15).text
+        
+        # 3. Add AI message ONLY if successful
+        st.session_state.messages.append({"role": "assistant", "content": response})
+        st.rerun() # Refresh to show new messages
+        
+    except Exception as e:
+        # If error, just show a temporary red box (DO NOT add to chat history)
+        st.error("⚠️ Connection error. Please try again.")
