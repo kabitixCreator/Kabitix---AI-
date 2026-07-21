@@ -1,3 +1,4 @@
+
 import streamlit as st
 import requests
 import urllib.parse
@@ -21,11 +22,15 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Top Bar
+# Top Bar (Safe Logo Loading)
 col_logo, col_newchat = st.columns([4, 1])
 with col_logo:
-    st.image("kabitix.png", width=50)
+    try:
+        st.image("kabitix.png", width=50)
+    except:
+        st.markdown("🧠", unsafe_allow_html=True) # Shows emoji if logo missing
     st.markdown('<h1 style="font-size: 24px; margin-left: 10px; display: inline;">Kabitix</h1>', unsafe_allow_html=True)
+
 with col_newchat:
     if st.button("➕ New Chat", use_container_width=False):
         st.session_state.messages = []
@@ -57,7 +62,7 @@ for idx, msg in enumerate(st.session_state.messages):
         # Action Buttons
         c1, c2, c3, c4, c5 = st.columns(5)
         with c1:
-            if st.button("👍", key=f"{msg_id}_like"):
+            if st.button("", key=f"{msg_id}_like"):
                 st.session_state.feedback[msg_id] = "liked"
                 st.toast("Thanks for the feedback! 👍", icon="✅")
                 st.rerun()
