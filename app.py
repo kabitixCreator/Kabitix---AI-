@@ -1,148 +1,90 @@
-
 import streamlit as st
 import requests
 import urllib.parse
 
-# Page Config
 st.set_page_config(page_title="Kabitix AI", page_icon="🧠", layout="wide")
 
-# Initialize State
 if "messages" not in st.session_state:
     st.session_state.messages = []
+if "feedback" not in st.session_state:
+    st.session_state.feedback = {}
 
-# Professional CSS - Clean gray icons
 st.markdown("""
 <style>
-    /* Hide Streamlit branding */
-    #MainMenu {visibility: hidden;}
+    #MainMenu {visibility: hidden;} 
     header {visibility: hidden;}
-    
-    /* App Background */
-    .stApp {
-        background-color: #212121;
-        color: #ececf1;
-    }
-    
-    /* Top Bar */
-    .top-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px 20px;
-        border-bottom: 1px solid #333;
-        margin-bottom: 20px;
-    }
-    
-    /* User message bubble */
-    .user-msg {
-        background-color: #424242;
-        padding: 12px 18px;
-        border-radius: 20px;
-        margin: 15px 0 15px auto;
-        max-width: 70%;
-        color: #ececf1;
-        font-size: 16px;
-    }
-    
-    /* AI message text */
-    .ai-msg {
-        padding: 10px 0;
-        margin: 10px 0;
-        max-width: 85%;
-        color: #ececf1;
-        font-size: 16px;
-        line-height: 1.6;
-    }
-    
-    /* Clean action buttons - WHITE/GRAY only! */
-    .action-row {
-        display: flex;
-        gap: 15px;
-        margin-top: 8px;
-        padding-top: 8px;
-        border-top: 1px solid #333;
-    }
-    
-    .action-icon {
-        cursor: pointer;
-        font-size: 16px;
-        color: #8e8e8e; /* GRAY color - not yellow! */
-        transition: all 0.2s;
-        filter: grayscale(100%); /* Force grayscale */
-    }
-    
-    .action-icon:hover {
-        color: #ffffff; /* White on hover */
-        transform: scale(1.1);
-    }
-    
-    /* Chat Input */
-    .stChatInput textarea {
-        background-color: #2f2f2f;
-        color: white;
-        border-radius: 24px;
-        border: 1px solid #424242;
-    }
+    .stApp { background-color: #212121; color: #ececf1; }
+    .user-msg { background-color: #424242; padding: 12px 18px; border-radius: 20px; margin: 15px 0 15px auto; max-width: 70%; color: #ececf1; font-size: 16px; }
+    .ai-msg { padding: 10px 0; margin: 10px 0; max-width: 85%; color: #ececf1; font-size: 16px; line-height: 1.6; }
+    .stButton>button { background: none; border: none; color: #8e8e8e; cursor: pointer; padding: 5px 10px; font-size: 16px; }
+    .stButton>button:hover { color: #ffffff; background-color: #333; border-radius: 6px; }
 </style>
 """, unsafe_allow_html=True)
 
-# ==========================================
-# TOP BAR (Logo + New Chat)
-# ==========================================
-col_logo, col_newchat = st.columns([3, 1])
-
+# Top Bar
+col_logo, col_newchat = st.columns([4, 1])
 with col_logo:
-    st.markdown('<h1 style="font-size: 22px; margin: 0; color: #ececf1;">🧠 Kabitix</h1>', unsafe_allow_html=True)
-
+    st.image("kabitix.png", width=50)
+    st.markdown('<h1 style="font-size: 24px; margin-left: 10px; display: inline;">Kabitix</h1>', unsafe_allow_html=True)
 with col_newchat:
-    if st.button(" New Chat", use_container_width=False):
+    if st.button("➕ New Chat", use_container_width=False):
         st.session_state.messages = []
+        st.session_state.feedback = {}
         st.rerun()
 
 st.markdown("---")
 
-# ==========================================
-# WELCOME MESSAGE (Only shows if chat is empty)
-# ==========================================
+# Welcome Text
 if len(st.session_state.messages) == 0:
     st.markdown('<h2 style="text-align: center; color: #ececf1; margin-top: 50px;">How can I help you today?</h2>', unsafe_allow_html=True)
 
-# ==========================================
-# CHAT MESSAGES
-# ==========================================
-for msg in st.session_state.messages:
+# AI Function
+def get_ai_response(prompt):
+    try:
+        url = f"https://text.pollinations.ai/{urllib.parse.quote(prompt)}"
+        return requests.get(url, timeout=15).text
+    except:
+        return "⚠️ Connection error. Please try again."
+
+# Chat History
+for idx, msg in enumerate(st.session_state.messages):
+    msg_id = f"msg_{idx}"
     if msg["role"] == "user":
         st.markdown(f'<div class="user-msg">{msg["content"]}</div>', unsafe_allow_html=True)
     else:
-        # AI Message
         st.markdown(f'<div class="ai-msg">{msg["content"]}</div>', unsafe_allow_html=True)
         
-        # Clean GRAY action buttons (no yellow emojis!)
-        st.markdown('''
-        <div class="action-row">
-            <span class="action-icon" title="Good response">&#128077;</span>
-            <span class="action-icon" title="Bad response">&#128078;</span>
-            <span class="action-icon" title="Copy">&#128203;</span>
-            <span class="action-icon" title="Read aloud">&#128266;</span>
-            <span class="action-icon" title="Share">&#128230;</span>
-        </div>
-        ''', unsafe_allow_html=True)
+        # Action Buttons
+        c1, c2, c3, c4, c5 = st.columns(5)
+        with c1:
+            if st.button("👍", key=f"{msg_id}_like"):
+                st.session_state.feedback[msg_id] = "liked"
+                st.toast("Thanks for the feedback! 👍", icon="✅")
+                st.rerun()
+        with c2:
+            if st.button("👎", key=f"{msg_id}_dislike"):
+                st.session_state.feedback[msg_id] = "disliked"
+                st.toast("Thanks for the feedback! 👎", icon="✅")
+                st.rerun()
+        with c3:
+            if st.button("📋", key=f"{msg_id}_copy"):
+                st.toast("Response copied!", icon="✅")
+        with c4:
+            if st.button("🔊", key=f"{msg_id}_sound"):
+                st.toast("Reading aloud...", icon="🔊")
+        with c5:
+            if st.button("📤", key=f"{msg_id}_share"):
+                st.toast("Share coming soon!", icon="📤")
 
-# ==========================================
-# CHAT INPUT & LOGIC
-# ==========================================
-if prompt := st.chat_input("Message Kabitix..."):
-    # Add user message
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    
-    # Get AI response
-    try:
-        url = f"https://text.pollinations.ai/{urllib.parse.quote(prompt)}"
-        response = requests.get(url, timeout=15).text
-        
-        # Add AI message
-        st.session_state.messages.append({"role": "assistant", "content": response})
-        st.rerun()
-        
-    except Exception as e:
-        st.error("⚠️ Connection error. Please try again.")
+# Input Area with + Icon
+st.markdown("---")
+col_plus, col_input = st.columns([1, 10])
+with col_plus:
+    st.button("➕", help="Upload files or images")
+with col_input:
+    if prompt := st.chat_input("Message Kabitix..."):
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        with st.spinner("Kabitix is thinking..."):
+            response = get_ai_response(prompt)
+            st.session_state.messages.append({"role": "assistant", "content": response})
+            st.rerun()
