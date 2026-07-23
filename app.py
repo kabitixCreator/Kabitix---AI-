@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 
-st.set_page_config(page_title="Kabitix AI", page_icon="", layout="wide")
+st.set_page_config(page_title="Kabitix AI", page_icon="🤖", layout="wide")
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
